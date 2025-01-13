@@ -1,0 +1,126 @@
+/* These styles are generated from project.scss. */
+
+:root {
+  --bg-dark: #1a1a1a;
+  --text-dark: #ffffff;
+  --border-dark: #333333;
+  --bg-light: #ffffff;
+  --text-light: #000000;
+  --border-light: #dddddd;
+}
+
+/* Dark mode styles (default) */
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Light mode styles */
+body.light-mode {
+  background-color: var(--bg-light);
+  color: var(--text-light);
+}
+
+/* Navbar styles */
+.navbar {
+  background-color: rgba(26, 26, 26, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.navbar-brand, .nav-link {
+  color: var(--text-dark) !important;
+}
+
+/* Light mode navbar */
+body.light-mode .navbar {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid var(--border-light);
+}
+
+body.light-mode .navbar-brand,
+body.light-mode .nav-link {
+  color: var(--text-light) !important;
+}
+
+/* Container styles */
+.container {
+  max-width: 1200px;
+  padding: 20px;
+}
+
+/* Alert styles */
+.alert-debug {
+  color: black;
+  background-color: white;
+  border-color: #d6e9c6;
+}
+
+.alert-error {
+  color: #b94a48;
+  background-color: #f2dede;
+  border-color: #eed3d7;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border-dark);
+  background: transparent;
+  color: var(--text-dark);
+}
+
+body.light-mode .theme-toggle {
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+/* Add these to your existing CSS */
+body.light-mode .date-header h2,
+body.light-mode .toolbar-btn,
+body.light-mode .nav-link,
+body.light-mode .download-btn {
+  color: var(--text-light);
+}
+
+body.light-mode .toolbar-btn:hover {
+  background: var(--hover-light);
+  color: var(--text-light);
+}
+
+/* Fix icon colors in light mode */
+body.light-mode .fas {
+  color: var(--text-light);
+}
+
+/* Fix navbar in light mode */
+body.light-mode .navbar {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid var(--border-light);
+}
+
+body.light-mode .navbar-brand,
+body.light-mode .nav-link {
+  color: var(--text-light) !important;
+}
+
+/* Theme toggle specific styles */
+.theme-toggle {
+  background: transparent;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+body.light-mode .theme-toggle {
+  color: var(--text-light);
+}
+
+/* Fix search box placeholder in light mode */
+body.light-mode .search-box::placeholder {
+  color: var(--text-light);
+  opacity: 0.7;
+}

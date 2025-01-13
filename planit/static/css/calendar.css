@@ -1,0 +1,714 @@
+:root {
+  /* Dark theme variables */
+  --bg-dark: #0f1117;
+  --text-dark: #ffffff;
+  --border-dark: #1e2028;
+  --input-bg-dark: #1e2028;
+  --hover-dark: #2a2d37;
+  
+  /* Light theme variables */
+  --bg-light: #ffffff;
+  --text-light: #2c3e50;
+  --border-light: #e1e4e8;
+  --input-bg-light: #f6f8fa;
+  --hover-light: #f1f1f1;
+}
+
+/* Default dark mode styles */
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* Light mode overrides */
+body.light-mode {
+  background-color: var(--bg-light);
+  color: var(--text-light);
+}
+
+/* Dropdown styles */
+.view-select {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+.view-select:hover {
+  background: var(--hover-dark);
+}
+
+body.light-mode .view-select {
+  background: var(--input-bg-light);
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+body.light-mode .view-select:hover {
+  background: var(--hover-light);
+}
+
+/* Search box light mode */
+body.light-mode .search-box {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-light);
+}
+
+/* Note editor light mode */
+body.light-mode .note-editor {
+  background: var(--input-bg-light);
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+/* Note items light mode */
+body.light-mode .note-item {
+  background: var(--input-bg-light);
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+body.light-mode .note-item:hover {
+  background: var(--hover-light);
+}
+
+/* Disable next arrow when on current date */
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+body.light-mode .nav-btn:disabled {
+  opacity: 0.3;
+}
+
+.calendar-container {
+  padding: 0 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-box {
+  background: var(--input-bg-dark);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text-dark);
+}
+
+.download-btn {
+  background: var(--input-bg-dark);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-btn:hover {
+  background: var(--hover-dark);
+}
+
+.date-header {
+  margin: 24px 0;
+}
+
+.date-header h2 {
+  font-size: 2.5rem;
+  font-weight: 500;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0;
+}
+
+.note-input {
+  margin: 24px 0;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.toolbar-btn:hover {
+  background: var(--hover-dark);
+}
+
+.toolbar-btn.active {
+  background: var(--hover-dark);
+  color: #4F46E5;
+}
+
+.note-editor {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  padding: 16px;
+  width: 100%;
+  min-height: 100px;
+  color: var(--text-dark);
+  outline: none;
+}
+
+.note-editor[placeholder]:empty:before {
+  content: attr(placeholder);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+}
+
+.note-item:hover {
+  transform: translateX(5px);
+  background: var(--hover-dark);
+}
+
+.note-content {
+  flex: 1;
+  text-align: left;
+  margin: 0;
+  padding-right: 16px;
+  white-space: pre-wrap;
+}
+
+.note-meta {
+  font-size: 0.85em;
+  color: #666;
+}
+
+/* Fix date header in light mode */
+body.light-mode .date-header h2 {
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.95), rgba(44, 62, 80, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fix navigation buttons in light mode */
+body.light-mode .nav-btn {
+  color: var(--text-light);
+}
+
+body.light-mode .nav-btn:hover {
+  background: var(--hover-light);
+}
+
+/* Fix download button in light mode */
+body.light-mode .download-btn {
+  color: var(--text-light);
+}
+
+body.light-mode .download-btn:hover {
+  background: var(--hover-light);
+}
+
+/* Fix search box in light mode */
+body.light-mode .search-box {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-light);
+}
+
+body.light-mode .search-box:focus {
+  outline: none;
+  border-color: var(--text-light);
+}
+
+/* Add these to your existing CSS */
+.navbar {
+  background-color: var(--bg-dark) !important;
+}
+
+.note-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.note-footer {
+  display: none;
+}
+
+.toggle-btn, .delete-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-dark);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover, .delete-btn:hover {
+  opacity: 1;
+}
+
+.delete-btn {
+  color: #ff4444;
+}
+
+.note-item.completed .note-content {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.completed .toggle-btn {
+  color: #00C851;
+  opacity: 1;
+}
+
+body.light-mode .toggle-btn,
+body.light-mode .delete-btn {
+  color: var(--text-light);
+}
+
+body.light-mode .delete-btn {
+  color: #dc3545;
+}
+
+body.light-mode .completed .toggle-btn {
+  color: #28a745;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+body.light-mode .nav-link {
+  color: rgba(44, 62, 80, 0.9);
+}
+
+/* Add these styles for text formatting */
+.note-editor b, .note-content b {
+    font-weight: bold;
+}
+
+.note-editor i, .note-content i {
+    font-style: italic;
+}
+
+.note-editor u, .note-content u {
+    text-decoration: underline;
+}
+
+/* Ensure colored text remains visible */
+.note-editor[contenteditable="true"]:focus {
+    outline: none;
+}
+
+.note-content, .note-editor {
+    line-height: 1.5;
+}
+
+/* Fix text color contrast in light mode */
+body.light-mode .note-content,
+body.light-mode .note-editor {
+    color: var(--text-light);
+}
+
+/* Make formatting visible in editor */
+.note-editor b {
+  font-weight: 700;
+}
+
+.note-editor i {
+  font-style: italic;
+}
+
+.note-editor u {
+  text-decoration: underline;
+}
+
+/* Active state for toolbar buttons */
+.toolbar-btn.active {
+  background: var(--hover-dark);
+  color: #4F46E5;
+}
+
+body.light-mode .toolbar-btn.active {
+  background: var(--hover-light);
+  color: #4F46E5;
+}
+
+/* Fix completed note style */
+.note-item.completed .note-content {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.completed .toggle-btn {
+  color: #00C851;
+  opacity: 1;
+}
+
+.note-item {
+  flex-direction: unset !important;
+  justify-content: unset !important;
+}
+
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Color picker styles */
+.color-picker {
+  position: relative;
+  display: inline-block;
+}
+
+#textColor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Weekly View Styles */
+.week-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-section {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.day-title {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-note-btn {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.add-note-btn:hover {
+  opacity: 1;
+  background: var(--hover-dark);
+}
+
+.day-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Light mode overrides for weekly view */
+body.light-mode .day-section {
+  background: var(--input-bg-light);
+  border-color: var(--border-light);
+}
+
+body.light-mode .day-title {
+  color: var(--text-light);
+}
+
+body.light-mode .add-note-btn {
+  color: var(--text-light);
+}
+
+body.light-mode .add-note-btn:hover {
+  background: var(--hover-light);
+}
+
+/* Add these styles for the modal */
+.modal-content {
+    background: var(--input-bg-dark);
+    color: var(--text-dark);
+}
+
+.modal-header {
+    border-bottom-color: var(--border-dark);
+}
+
+.modal-footer {
+    border-top-color: var(--border-dark);
+}
+
+.btn-close {
+    color: var(--text-dark);
+}
+
+/* Light mode overrides */
+body.light-mode .modal-content {
+    background: var(--input-bg-light);
+    color: var(--text-light);
+}
+
+body.light-mode .modal-header {
+    border-bottom-color: var(--border-light);
+}
+
+body.light-mode .modal-footer {
+    border-top-color: var(--border-light);
+}
+
+/* Update weekly view styles */
+.day-section .note-input {
+    margin: 12px 0;
+}
+
+.day-section .editor-toolbar {
+    margin-bottom: 8px;
+    padding: 6px;
+}
+
+.day-section .note-editor {
+    min-height: 60px; /* Smaller height for weekly view */
+}
+
+.day-notes {
+    margin-top: 12px;
+}
+
+/* Light mode */
+body.light-mode .add-note-btn {
+    color: var(--text-light);
+}
+
+body.light-mode .add-note-btn:hover {
+    background: var(--hover-light);
+}
+
+/* Monthly View Styles */
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.month-header h2 {
+  font-size: 2rem;
+  font-weight: 500;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.month-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+  color: var(--text-dark);
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day-cell {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 100px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.day-cell:hover {
+  transform: translateY(-2px);
+  background: var(--hover-dark);
+}
+
+.day-cell.today {
+  border-color: #4F46E5;
+}
+
+.day-cell.selected {
+  background: var(--hover-dark);
+  border-color: #4F46E5;
+}
+
+.day-cell.other-month {
+  opacity: 0.5;
+}
+
+.day-number {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.note-count {
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  opacity: 0.7;
+}
+
+/* Sidebar Styles */
+.day-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: var(--bg-dark);
+  border-left: 1px solid var(--border-dark);
+  padding: 24px;
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+.day-sidebar.open {
+  right: 0;
+}
+
+.sidebar-header {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.sidebar-header h3 {
+  font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.sidebar-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.close-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.close-sidebar:hover {
+  opacity: 1;
+}
+
+/* Light mode overrides */
+body.light-mode .month-header h2 {
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.95), rgba(44, 62, 80, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light-mode .day-cell {
+  background: var(--input-bg-light);
+  border-color: var(--border-light);
+}
+
+body.light-mode .day-cell:hover {
+  background: var(--hover-light);
+}
+
+body.light-mode .day-sidebar {
+  background: var(--bg-light);
+  border-color: var(--border-light);
+} 

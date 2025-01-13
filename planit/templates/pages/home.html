@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+<link href="{% static 'css/calendar.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-container">
+  <div class="calendar-header">
+    <div class="calendar-nav">
+      <div class="nav-arrows">
+        <button class="btn btn-link nav-btn" id="prevDay">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="btn btn-link nav-btn" id="nextDay">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <input type="text" class="search-box" placeholder="Search...">
+      <button class="download-btn" id="exportNotes">
+        <i class="far fa-download"></i>
+        Export
+      </button>
+      <select class="view-select" id="viewSelect">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Daily View Container -->
+  <div id="dailyView" class="view-container">
+    <div class="date-header">
+      <h2 id="currentDate">Monday, Jan 10</h2>
+    </div>
+    <div class="note-input">
+      <div class="editor-toolbar">
+        <button class="toolbar-btn" data-command="bold" title="Bold">
+          <i class="fas fa-bold"></i>
+        </button>
+        <button class="toolbar-btn" data-command="italic" title="Italic">
+          <i class="fas fa-italic"></i>
+        </button>
+        <button class="toolbar-btn" data-command="underline" title="Underline">
+          <i class="fas fa-underline"></i>
+        </button>
+        <div class="color-picker">
+          <input type="color" id="textColor">
+          <button class="toolbar-btn" id="colorBtn" title="Text Color">
+            <i class="fas fa-palette"></i>
+          </button>
+        </div>
+      </div>
+      <div id="noteEditor" class="note-editor" contenteditable="true" placeholder="Add new note..."></div>
+    </div>
+    <div id="notesList" class="notes-list">
+      <!-- Notes will be dynamically added here -->
+    </div>
+  </div>
+
+  <!-- Weekly View Container -->
+  <div id="weeklyView" class="view-container" style="display: none;">
+    <div class="week-container">
+      <!-- Days will be dynamically added here -->
+    </div>
+  </div>
+
+  <div id="monthlyView" class="view-container" style="display: none;">
+    <div class="month-header">
+      <h2>January</h2>
+    </div>
+    <div class="month-grid">
+      <div class="weekdays">
+        <div>Monday</div>
+        <div>Tuesday</div>
+        <div>Wednesday</div>
+        <div>Thursday</div>
+        <div>Friday</div>
+        <div>Saturday</div>
+        <div>Sunday</div>
+      </div>
+      <div class="days-grid">
+        <!-- Days will be dynamically added here -->
+      </div>
+    </div>
+    <!-- Sidebar for selected day -->
+    <div class="day-sidebar">
+      <div class="sidebar-header">
+        <h3>Your notes for</h3>
+        <h2 id="selectedDate">Monday, Jan 10</h2>
+        <button class="close-sidebar">×</button>
+      </div>
+      <div class="sidebar-content">
+        <div class="note-input">
+          <button class="add-note-btn">
+            <i class="fas fa-plus"></i>
+            Add new note
+          </button>
+        </div>
+        <div class="day-notes">
+          <!-- Notes will be dynamically added here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="noteEditorModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Note</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="editor-toolbar">
+            <button class="toolbar-btn" data-command="bold" title="Bold">
+              <i class="fas fa-bold"></i>
+            </button>
+            <button class="toolbar-btn" data-command="italic" title="Italic">
+              <i class="fas fa-italic"></i>
+            </button>
+            <button class="toolbar-btn" data-command="underline" title="Underline">
+              <i class="fas fa-underline"></i>
+            </button>
+            <div class="color-picker">
+              <input type="color" id="modalTextColor">
+              <button class="toolbar-btn" id="modalColorBtn" title="Text Color">
+                <i class="fas fa-palette"></i>
+              </button>
+            </div>
+          </div>
+          <div id="modalNoteEditor" class="note-editor" contenteditable="true" placeholder="Add new note..."></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveModalNote">Save Note</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

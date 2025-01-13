@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=planit
+POSTGRES_USER=vZkGWekCRcRkqXBCcxQMyKkdBCLtYJoE
+POSTGRES_PASSWORD=9kh27NpBhNfp3sOyLBvi20n6bC8Gt7LdhYZdmDwm2BytI1x6UjgyatV11YJsrR7f

@@ -1,0 +1,11 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="textGradient" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.95)"/>
+      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.7)"/>
+    </linearGradient>
+  </defs>
+  <path d="M12.8 25.6C19.8692 25.6 25.6 19.8692 25.6 12.8C25.6 5.73075 19.8692 0 12.8 0C5.73075 0 0 5.73075 0 12.8C0 19.8692 5.73075 25.6 12.8 25.6Z" fill="#4F46E5"/>
+  <path d="M11.52 18.56L6.4 13.44L7.68 12.16L11.52 16L17.92 9.6L19.2 10.88L11.52 18.56Z" fill="white"/>
+  <text x="32" y="19" font-family="Arial" font-size="20" font-weight="bold" fill="url(#textGradient)">PlanIt.pro</text>
+</svg> 

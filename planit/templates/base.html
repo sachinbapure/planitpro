@@ -1,0 +1,106 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}PlanIt - Simple Calendar Notes{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simple and fast calendar-based notes">
+    <meta name="author" content="Sachin">
+
+    <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}">
+
+    {% block css %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'vendor/css/bootstrap.min.css' %}">
+    <!-- Project specific CSS -->
+    <link href="{% static 'css/project.css' %}" rel="stylesheet">
+    {% endblock %}
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Theme initialization script - must run before page renders -->
+    <script>
+      // Initialize theme before page load to prevent flash
+      if (!localStorage.getItem('theme')) {
+        localStorage.setItem('theme', 'dark');
+        document.documentElement.classList.add('dark-mode');
+      } else if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-mode');
+      }
+    </script>
+  </head>
+
+  <body class="dark-mode">
+    <nav class="navbar navbar-expand-md fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">
+          <img src="{% static 'images/logo.svg' %}" alt="PlanIt.pro" height="32">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+
+          </ul>
+          
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <button class="theme-toggle nav-link" id="themeToggle">
+                <i class="fas fa-moon"></i>
+              </button>
+            </li>
+            {% if request.user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
+              </li>
+            {% else %}
+              {% if ACCOUNT_ALLOW_REGISTRATION %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
+                </li>
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5 pt-4">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block content %}
+      {% endblock content %}
+    </div>
+
+    {% block modal %}{% endblock modal %}
+
+    <!-- Core JavaScript -->
+    <script src="{% static 'vendor/js/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Additional JavaScript -->
+    {% block javascript %}
+    {% endblock javascript %}
+
+    <!-- Project specific JavaScript - should be last -->
+    <script src="{% static 'js/project.js' %}"></script>
+
+    {% block inline_javascript %}
+    {% endblock inline_javascript %}
+  </body>
+</html>
