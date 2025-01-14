@@ -711,4 +711,122 @@ body.light-mode .day-cell:hover {
 body.light-mode .day-sidebar {
   background: var(--bg-light);
   border-color: var(--border-light);
+}
+
+/* Weekly view specific styles */
+.week-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.day-section {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.day-section .note-input {
+    margin: 16px 0;
+    background: var(--input-bg-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.day-section .editor-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--input-bg-dark);
+    border-bottom: 1px solid var(--border-dark);
+}
+
+.day-section .note-editor {
+    min-height: 100px;
+    padding: 16px;
+    outline: none;
+    color: var(--text-dark);
+}
+
+.day-section .note-editor[placeholder]:empty:before {
+    content: attr(placeholder);
+    color: var(--text-dark);
+    opacity: 0.5;
+}
+
+.day-section .toolbar-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-section .toolbar-btn:hover {
+    background: var(--hover-dark);
+}
+
+.day-section .toolbar-btn.active {
+    background: var(--hover-dark);
+    color: #4F46E5;
+}
+
+.day-section .color-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.day-section .text-color {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.day-section .day-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.day-section .note-item {
+    background: var(--input-bg-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.day-section .note-content {
+    flex: 1;
+    color: var(--text-dark);
+}
+
+.day-section .note-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.day-section .toggle-btn,
+.day-section .delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    opacity: 0.7;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-section .toggle-btn:hover,
+.day-section .delete-btn:hover {
+    opacity: 1;
 } 

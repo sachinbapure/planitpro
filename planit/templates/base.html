@@ -31,27 +31,58 @@
         document.documentElement.classList.add('light-mode');
       }
     </script>
+
+    <!-- Add this in the head section, before other CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
 
   <body class="dark-mode">
     <nav class="navbar navbar-expand-md fixed-top">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">
-          <img src="{% static 'images/logo.svg' %}" alt="PlanIt.pro" height="32">
+          <!-- Simple animated logo -->
+          <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path class="calendar-page" d="M7 5C7 3.89543 7.89543 3 9 3H23C24.1046 3 25 3.89543 25 5V27C25 28.1046 24.1046 29 23 29H9C7.89543 29 7 28.1046 7 27V5Z" stroke="currentColor" stroke-width="2"/>
+            <path class="calendar-lines" d="M11 11H21M11 16H21M11 21H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path class="calendar-date" d="M11 7H21" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span class="logo-text">PlanIt.pro</span>
         </a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
-
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}" id="todayLink">
+                <i class="fas fa-calendar-day"></i>
+                Today
+              </a>
+            </li>
           </ul>
           
           <ul class="navbar-nav">
+            <!-- Update theme toggle button -->
             <li class="nav-item">
-              <button class="theme-toggle nav-link" id="themeToggle">
-                <i class="fas fa-moon"></i>
+              <button class="theme-toggle nav-link" id="themeToggle" aria-label="Toggle theme">
+                <div class="theme-switch">
+                  <div class="switch-track">
+                    <div class="switch-icons">
+                      <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 1V3M12 21V23M1 12H3M21 12H23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                      <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                    </div>
+                    <div class="switch-handle"></div>
+                  </div>
+                </div>
               </button>
             </li>
             {% if request.user.is_authenticated %}

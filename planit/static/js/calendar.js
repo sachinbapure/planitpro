@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // State
     let currentDate = new Date();
     const today = new Date();
+    setStartOfDay(today);
+    setStartOfDay(currentDate);
     
     // Get date key in YYYY-MM-DD format with timezone handling
     function getDateKey(date) {
@@ -28,10 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
         date.setHours(0, 0, 0, 0);
         return date;
     }
-
-    // Initialize with proper timezone handling
-    setStartOfDay(today);
-    setStartOfDay(currentDate);
 
     let notes = {};
     
@@ -97,21 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    prevDayBtn.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() - 1);
-        updateDateDisplay();
-        updateNavigationState();
-        loadNotes();
-    });
-
-    nextDayBtn.addEventListener('click', () => {
-        if (currentDate < today) {
-            currentDate.setDate(currentDate.getDate() + 1);
-            updateDateDisplay();
-            updateNavigationState();
-            loadNotes();
-        }
-    });
+    prevDayBtn.addEventListener('click', () => navigateWeek(-1));
+    nextDayBtn.addEventListener('click', () => navigateWeek(1));
 
     // Define commands array at the top with other variables
     const commands = ['bold', 'italic', 'underline'];
@@ -219,9 +204,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Functions
     function updateDateDisplay() {
-        const options = { weekday: 'long', day: 'numeric', month: 'short' };
-        const dateStr = currentDate.toLocaleDateString(undefined, options);
-        currentDateEl.textContent = dateStr;
+        const options = { 
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric'
+        };
+        const dateString = currentDate.toLocaleDateString('en-US', options);
+        currentDateEl.textContent = dateString;
     }
     
     function saveNote() {
@@ -266,10 +255,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="note-content">${note.content}</div>
                 <div class="note-actions">
                     <button class="toggle-btn" onclick="toggleNote('${dateKey}', ${note.id})">
-                        <i class="fas ${note.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
+                        <i class="far ${note.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
                     </button>
                     <button class="delete-btn" onclick="deleteNote('${dateKey}', ${note.id})">
-                        <i class="fas fa-trash"></i>
+                        <i class="far fa-trash-alt"></i>
                     </button>
                 </div>
             `;
@@ -322,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update the Today link handler
-    document.querySelector('.nav-link')?.addEventListener('click', (e) => {
+    document.getElementById('todayLink')?.addEventListener('click', (e) => {
         e.preventDefault();
         const view = viewSelect.value;
         
@@ -341,9 +330,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update toggle and delete handlers
-    window.toggleNote = function(noteId) {
-        const dateKey = getDateKey(currentDate);
-        const noteIndex = notes[dateKey].findIndex(n => n.id === noteId);
+    window.toggleNote = function(dateKey, noteId) {
+        const noteIndex = notes[dateKey].findIndex(n => n.id === parseInt(noteId));
         if (noteIndex !== -1) {
             notes[dateKey][noteIndex].completed = !notes[dateKey][noteIndex].completed;
             localStorage.setItem('notes', JSON.stringify(notes));
@@ -351,11 +339,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    window.deleteNote = function(noteId) {
-        const dateKey = getDateKey(currentDate);
-        notes[dateKey] = notes[dateKey].filter(n => n.id !== noteId);
-        localStorage.setItem('notes', JSON.stringify(notes));
-        loadNotes();
+    window.deleteNote = function(dateKey, noteId) {
+        const noteIndex = notes[dateKey].findIndex(n => n.id === parseInt(noteId));
+        if (noteIndex !== -1) {
+            notes[dateKey].splice(noteIndex, 1);
+            if (notes[dateKey].length === 0) {
+                delete notes[dateKey];
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+        }
     };
 
     // Weekly view functions
@@ -399,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const daySection = document.createElement('div');
             daySection.className = 'day-section';
             
+            // Updated HTML structure to match daily view styling
             daySection.innerHTML = `
                 <div class="day-header">
                     <div class="day-title">
@@ -420,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas fa-underline"></i>
                         </button>
                         <div class="color-picker">
-                            <input type="color" class="text-color">
+                            <input type="color" class="text-color" id="textColor-${dateKey}">
                             <button class="toolbar-btn color-btn" title="Text Color">
                                 <i class="fas fa-palette"></i>
                             </button>
@@ -451,6 +445,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const addBtn = daySection.querySelector('.add-note-btn');
             const noteInput = daySection.querySelector('.note-input');
             const editor = daySection.querySelector('.note-editor');
+            const toolbarBtns = daySection.querySelectorAll('.toolbar-btn');
+            const colorBtn = daySection.querySelector('.color-btn');
+            const colorPicker = daySection.querySelector('.text-color');
 
             addBtn.addEventListener('click', () => {
                 noteInput.style.display = noteInput.style.display === 'none' ? 'block' : 'none';
@@ -460,11 +457,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Add event listeners for the editor
-            const toolbarBtns = daySection.querySelectorAll('.toolbar-btn');
-            const colorBtn = daySection.querySelector('.color-btn');
-            const colorPicker = daySection.querySelector('.text-color');
-
-            // Handle Enter key to save note
             editor.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -500,6 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (command) {
                         editor.focus();
                         document.execCommand(command, false, null);
+                        updateToolbarState(daySection);
                     }
                 });
             });
@@ -515,6 +508,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.execCommand('foreColor', false, this.value);
                 colorBtn.style.color = this.value;
             });
+
+            // Update toolbar state when selection changes
+            editor.addEventListener('keyup', () => updateToolbarState(daySection));
+            editor.addEventListener('mouseup', () => updateToolbarState(daySection));
+            editor.addEventListener('focus', () => updateToolbarState(daySection));
+        });
+    }
+
+    // Helper function to update toolbar state
+    function updateToolbarState(container) {
+        const commands = ['bold', 'italic', 'underline'];
+        commands.forEach(command => {
+            const btn = container.querySelector(`[data-command="${command}"]`);
+            if (btn) {
+                const isActive = document.queryCommandState(command);
+                btn.classList.toggle('active', isActive);
+            }
         });
     }
 
@@ -538,25 +548,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update navigation for both views
     function navigateWeek(direction) {
+        console.log('Current date before:', currentDate.toDateString());
+        console.log('Direction:', direction);
+        
         const view = viewSelect.value;
+        const newDate = new Date(currentDate); // Create a new date object
+        
         if (view === 'weekly') {
-            currentDate.setDate(currentDate.getDate() + (direction * 7));
-            renderWeeklyView();
+            newDate.setDate(newDate.getDate() + (direction * 7));
         } else {
-            currentDate.setDate(currentDate.getDate() + direction);
-            updateDateDisplay();
-            loadNotes();
+            newDate.setDate(newDate.getDate() + direction);
         }
-        updateNavigationState();
+        
+        console.log('New date after:', newDate.toDateString());
+        
+        // Only update if moving backward or if next date is not beyond today
+        if (direction < 0 || newDate <= today) {
+            currentDate = newDate;
+            if (view === 'weekly') {
+                renderWeeklyView();
+            } else {
+                updateDateDisplay();
+                loadNotes();
+            }
+            updateNavigationState();
+        }
+        
+        console.log('Final current date:', currentDate.toDateString());
     }
-
-    // Update navigation handlers
-    prevDayBtn.addEventListener('click', () => navigateWeek(-1));
-    nextDayBtn.addEventListener('click', () => {
-        if (currentDate < today) {
-            navigateWeek(1);
-        }
-    });
 
     function renderMonthlyView() {
         const monthContainer = document.querySelector('.days-grid');
@@ -756,5 +775,83 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.day-cell').forEach(cell => {
             cell.classList.remove('selected');
         });
+    });
+
+    // Update the text formatting handlers
+    function initializeTextEditor() {
+        const editor = document.getElementById('noteEditor');
+        const toolbarBtns = document.querySelectorAll('.toolbar-btn');
+        const colorBtn = document.getElementById('colorBtn');
+        const colorPicker = document.getElementById('textColor');
+
+        // Set initial focus
+        editor.focus();
+
+        // Format buttons (Bold, Italic, Underline)
+        toolbarBtns.forEach(btn => {
+            if (btn.dataset.command) {
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent losing focus
+                    const command = btn.dataset.command;
+                    
+                    // Save selection
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+                    
+                    // Execute command
+                    document.execCommand(command, false, null);
+                    
+                    // Restore selection
+                    editor.focus();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // Update button state
+                    updateToolbarState();
+                });
+            }
+        });
+
+        // Color picker
+        colorBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            colorPicker.click();
+            
+            colorPicker.addEventListener('change', function() {
+                // Restore selection
+                editor.focus();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Apply color
+                document.execCommand('foreColor', false, this.value);
+                colorBtn.style.color = this.value;
+                colorBtn.classList.add('active');
+            }, { once: true }); // Remove listener after use
+        });
+
+        // Update toolbar state when selection changes
+        ['keyup', 'mouseup', 'focus'].forEach(event => {
+            editor.addEventListener(event, updateToolbarState);
+        });
+
+        function updateToolbarState() {
+            toolbarBtns.forEach(btn => {
+                const command = btn.dataset.command;
+                if (command) {
+                    const isActive = document.queryCommandState(command);
+                    btn.classList.toggle('active', isActive);
+                }
+            });
+        }
+    }
+
+    // Call this function when the document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTextEditor();
+        // ... rest of your existing code
     });
 }); 
