@@ -1,7 +1,8 @@
 /* Project specific Javascript goes here. */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Theme toggle functionality
+    // Theme toggle functionality removed for future release
+    /*
     const themeToggle = document.getElementById('themeToggle');
     
     if (themeToggle) {
@@ -19,4 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const isLight = savedTheme === 'light';
     document.body.classList.add(isLight ? 'light-mode' : 'dark-mode');
     document.body.classList.remove(isLight ? 'dark-mode' : 'light-mode');
+    */
+
+    // Force dark mode
+    document.body.classList.add('dark-mode');
+    localStorage.setItem('theme', 'dark');
 });

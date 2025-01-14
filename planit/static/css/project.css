@@ -168,9 +168,9 @@ body.light-mode .search-box::placeholder {
 /* Logo text gradient */
 .logo-text {
   font-family: 'Manrope', sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.25rem;
-  background: linear-gradient(to right, #FFFFFF 0%, #999999 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -183,7 +183,7 @@ body.light-mode .logo-icon {
 }
 
 body.light-mode .logo-text {
-  background: linear-gradient(to right, #000000 0%, #666666 100%);
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.95), rgba(44, 62, 80, 0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -221,7 +221,7 @@ body.light-mode .logo-text {
 
 /* Light mode overrides */
 .light-mode .logo-text {
-  background: linear-gradient(135deg, #3730A3, #4F46E5);
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.95), rgba(44, 62, 80, 0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -757,3 +757,27 @@ body.light-mode .search-box:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
+
+/* Comment out all light theme related code but keep dark theme */
+
+/* Theme toggle button and light mode styles - commented for future release */
+/*
+.theme-switch,
+.switch-track,
+.switch-icons,
+.switch-handle,
+body.light-mode,
+.light-mode .logo-text,
+.light-mode .theme-toggle,
+body.light-mode .switch-track,
+body.light-mode .switch-icons,
+body.light-mode .switch-handle,
+.light-mode .moon-icon,
+body.light-mode .toolbar-btn,
+body.light-mode .note-editor,
+body.light-mode .note-item,
+... (all light mode styles)
+{
+    display: none;
+}
+*/

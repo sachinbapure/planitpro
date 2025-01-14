@@ -48,7 +48,7 @@
             <path class="calendar-lines" d="M11 11H21M11 16H21M11 21H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path class="calendar-date" d="M11 7H21" stroke="currentColor" stroke-width="2"/>
           </svg>
-          <span class="logo-text">PlanIt.pro</span>
+          <span class="logo-text">PlannIt.pro</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -66,25 +66,12 @@
           </ul>
           
           <ul class="navbar-nav">
-            <!-- Update theme toggle button -->
-            <li class="nav-item">
+            <!-- Theme toggle button removed for future release -->
+            <!-- <li class="nav-item">
               <button class="theme-toggle nav-link" id="themeToggle" aria-label="Toggle theme">
-                <div class="theme-switch">
-                  <div class="switch-track">
-                    <div class="switch-icons">
-                      <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 1V3M12 21V23M1 12H3M21 12H23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2"/>
-                      </svg>
-                      <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2"/>
-                      </svg>
-                    </div>
-                    <div class="switch-handle"></div>
-                  </div>
-                </div>
+                <div class="theme-switch">...</div>
               </button>
-            </li>
+            </li> -->
             {% if request.user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
