@@ -33,16 +33,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let notes = {};
     
-    // Load notes from localStorage with proper date handling
+    // Initialize notes from window.initialData
     function initializeNotes() {
-        try {
-            const savedNotes = localStorage.getItem('notes');
-            if (savedNotes) {
-                notes = JSON.parse(savedNotes);
-            }
-        } catch (e) {
-            console.error('Error loading notes:', e);
+        if (window.initialData) {
+            // Initialize notes object
             notes = {};
+            
+            // Add today's tasks
+            Object.assign(notes, window.initialData.today);
+            
+            // Add week tasks
+            Object.assign(notes, window.initialData.week);
+            
+            // Add month tasks
+            Object.assign(notes, window.initialData.month);
+            
+            // Set current date if provided
+            if (window.initialData.currentDate) {
+                currentDate = new Date(window.initialData.currentDate);
+                setStartOfDay(currentDate);
+            }
         }
     }
     
@@ -88,10 +98,15 @@ document.addEventListener('DOMContentLoaded', function() {
     updateNavigationState();
 
     // Event Listeners
-    noteEditor.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
+    noteEditor.addEventListener('keydown', async function(e) {
+        if (e.key === 'Enter') {
+            if (e.shiftKey) {
+                // Allow default behavior for Shift+Enter (new line)
+                return;
+            }
+            // Prevent default Enter behavior
             e.preventDefault();
-            saveNote();
+            await saveNote();
         }
     });
 
@@ -103,78 +118,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Text formatting handlers
     toolbarBtns.forEach(btn => {
-        $(btn).on('mousedown', function(e) {
+        btn.addEventListener('mousedown', function(e) {
             e.preventDefault();
-            const command = $(this).data('command');
+            const command = this.dataset.command;
             
-            // Save current selection
-            const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            
-            // Focus editor and restore selection
+            // Focus editor first
             noteEditor.focus();
-            selection.removeAllRanges();
-            selection.addRange(range);
+            
+            // Get current selection
+            const selection = window.getSelection();
+            
+            // If no text is selected and it's not a color command, return
+            if (selection.rangeCount === 0 && !this.classList.contains('color-btn')) {
+                return;
+            }
             
             // Execute command
-            document.execCommand(command, false, null);
-            
-            // Update button state
-            if (commands.includes(command)) {
-                const isActive = document.queryCommandState(command);
-                $(this).toggleClass('active', isActive);
+            if (command) {
+                document.execCommand(command, false, null);
+                
+                // Update button state
+                if (commands.includes(command)) {
+                    const isActive = document.queryCommandState(command);
+                    this.classList.toggle('active', isActive);
+                }
             }
         });
     });
 
     // Color picker handler
-    $(colorBtn).on('click', function(e) {
+    colorBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        $(colorPicker).trigger('click');
+        colorPicker.click();
     });
 
-    $(colorPicker).on('change', function(e) {
-        const color = $(this).val();
+    colorPicker.addEventListener('change', function(e) {
+        const color = this.value;
         
-        // Save current selection
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        
-        // Focus editor and restore selection
+        // Focus editor
         noteEditor.focus();
-        selection.removeAllRanges();
-        selection.addRange(range);
+        
+        // Get current selection
+        const selection = window.getSelection();
+        
+        // If no text is selected, apply to cursor position
+        if (selection.rangeCount === 0) {
+            const range = document.createRange();
+            range.setStart(noteEditor, 0);
+            range.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
         
         // Execute color command
         document.execCommand('foreColor', false, color);
-        $(colorBtn).css('color', color);
+        colorBtn.style.color = color;
     });
 
-    // Update formatting buttons when text is selected
-    $(noteEditor).on('mouseup keyup', function() {
-        commands.forEach(command => {
-            const isActive = document.queryCommandState(command);
-            $(`.toolbar-btn[data-command="${command}"]`).toggleClass('active', isActive);
-        });
-    });
+    // Update toolbar state when selection changes
+    noteEditor.addEventListener('keyup', updateToolbarState);
+    noteEditor.addEventListener('mouseup', updateToolbarState);
+    noteEditor.addEventListener('focus', updateToolbarState);
 
-    // Keep selection when clicking buttons
-    $('.editor-toolbar').on('mousedown', function(e) {
-        e.preventDefault();
-    });
-
-    // Add focus handler for noteEditor
-    noteEditor.addEventListener('focus', () => {
-        updateFormatButtons();
-    });
-
-    // Add input handler for noteEditor
-    noteEditor.addEventListener('input', () => {
-        updateFormatButtons();
-    });
-
-    // Function to update format button states
-    function updateFormatButtons() {
+    function updateToolbarState() {
+        const commands = ['bold', 'italic', 'underline'];
         commands.forEach(command => {
             const btn = document.querySelector(`[data-command="${command}"]`);
             if (btn) {
@@ -202,41 +209,175 @@ document.addEventListener('DOMContentLoaded', function() {
 
     exportBtn.addEventListener('click', exportNotes);
     
-    // Functions
-    function updateDateDisplay() {
-        const options = { 
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric'
-        };
-        const dateString = currentDate.toLocaleDateString('en-US', options);
-        currentDateEl.textContent = dateString;
+    // Add loading overlay elements
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.style.display = 'none';
+    loadingOverlay.innerHTML = `
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    `;
+    document.querySelector('.calendar-container').appendChild(loadingOverlay);
+
+    // Add loading indicator for note editor
+    const editorLoadingSpinner = document.createElement('div');
+    editorLoadingSpinner.className = 'editor-spinner';
+    editorLoadingSpinner.style.display = 'none';
+    editorLoadingSpinner.innerHTML = `
+        <div class="spinner-border spinner-border-sm text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    `;
+    noteEditor.parentElement.appendChild(editorLoadingSpinner);
+
+    // Loading state management
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
     }
-    
-    function saveNote() {
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    function showEditorLoading() {
+        editorLoadingSpinner.style.display = 'flex';
+        noteEditor.style.opacity = '0.5';
+        noteEditor.setAttribute('contenteditable', 'false');
+    }
+
+    function hideEditorLoading() {
+        editorLoadingSpinner.style.display = 'none';
+        noteEditor.style.opacity = '1';
+        noteEditor.setAttribute('contenteditable', 'true');
+    }
+
+    // Update CSRF token function
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Update API functions with loading states
+    async function fetchTasks(startDate, endDate, viewType = 'daily') {
+        showLoading();
+        try {
+            const response = await fetch(`/users/api/tasks/?start_date=${startDate}&end_date=${endDate}&view_type=${viewType}`);
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                Object.assign(notes, data.tasks);
+                return data.tasks;
+            }
+            throw new Error(data.message || 'Failed to fetch tasks');
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+            return {};
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function createTask(content, dateKey) {
+        showEditorLoading();
+        try {
+            const response = await fetch('/users/api/task/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({ content, dateKey })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                if (!notes[dateKey]) {
+                    notes[dateKey] = [];
+                }
+                notes[dateKey].unshift(data.task);
+                return data.task;
+            }
+            throw new Error(data.message || 'Failed to create task');
+        } catch (error) {
+            console.error('Error creating task:', error);
+            return null;
+        } finally {
+            hideEditorLoading();
+        }
+    }
+
+    async function updateTask(taskId, completed) {
+        try {
+            const response = await fetch(`/users/api/task/${taskId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({ completed })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                // Update local notes
+                const dateKey = data.task.dateKey;
+                const taskIndex = notes[dateKey].findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    notes[dateKey][taskIndex] = data.task;
+                }
+                return data.task;
+            }
+            throw new Error(data.message || 'Failed to update task');
+        } catch (error) {
+            console.error('Error updating task:', error);
+            return null;
+        }
+    }
+
+    async function deleteTask(taskId, dateKey) {
+        try {
+            const response = await fetch(`/users/api/task/${taskId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                }
+            });
+            
+            if (response.ok) {
+                // Update local notes
+                notes[dateKey] = notes[dateKey].filter(t => t.id !== taskId);
+                if (notes[dateKey].length === 0) {
+                    delete notes[dateKey];
+                }
+                return true;
+            }
+            throw new Error('Failed to delete task');
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            return false;
+        }
+    }
+
+    async function saveNote() {
         const content = noteEditor.innerHTML.trim();
         if (!content) return;
         
-        const dateKey = getDateKey(currentDate);
-        if (!notes[dateKey]) {
-            notes[dateKey] = [];
+        showEditorLoading();
+        try {
+            const dateKey = getDateKey(currentDate);
+            const task = await createTask(content, dateKey);
+            
+            if (task) {
+                noteEditor.innerHTML = '';
+                loadNotes();
+            }
+        } catch (error) {
+            console.error('Error saving note:', error);
+        } finally {
+            hideEditorLoading();
         }
-        
-        const newNote = {
-            id: Date.now(),
-            content: content,
-            timestamp: Date.now(),
-            completed: false,
-            dateKey: dateKey // Store the actual dateKey with the note
-        };
-        
-        notes[dateKey].push(newNote);
-        localStorage.setItem('notes', JSON.stringify(notes));
-        
-        noteEditor.innerHTML = '';
-        loadNotes();
     }
-    
+
     function loadNotes() {
         const dateKey = getDateKey(currentDate);
         const dayNotes = notes[dateKey] || [];
@@ -330,23 +471,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update toggle and delete handlers
-    window.toggleNote = function(dateKey, noteId) {
-        const noteIndex = notes[dateKey].findIndex(n => n.id === parseInt(noteId));
+    window.toggleNote = async function(dateKey, taskId) {
+        const noteIndex = notes[dateKey].findIndex(n => n.id === taskId);
         if (noteIndex !== -1) {
-            notes[dateKey][noteIndex].completed = !notes[dateKey][noteIndex].completed;
-            localStorage.setItem('notes', JSON.stringify(notes));
-            loadNotes();
+            const currentNote = notes[dateKey][noteIndex];
+            const updatedTask = await updateTask(taskId, !currentNote.completed);
+            if (updatedTask) {
+                loadNotes();
+            }
         }
     };
 
-    window.deleteNote = function(dateKey, noteId) {
-        const noteIndex = notes[dateKey].findIndex(n => n.id === parseInt(noteId));
-        if (noteIndex !== -1) {
-            notes[dateKey].splice(noteIndex, 1);
-            if (notes[dateKey].length === 0) {
-                delete notes[dateKey];
-            }
-            localStorage.setItem('notes', JSON.stringify(notes));
+    window.deleteNote = async function(dateKey, taskId) {
+        const success = await deleteTask(taskId, dateKey);
+        if (success) {
             loadNotes();
         }
     };
@@ -457,30 +595,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Add event listeners for the editor
-            editor.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
+            editor.addEventListener('keydown', async function(e) {
+                if (e.key === 'Enter') {
+                    if (e.shiftKey) {
+                        return;
+                    }
                     e.preventDefault();
                     const content = this.innerHTML.trim();
                     if (!content) return;
 
-                    if (!notes[dateKey]) {
-                        notes[dateKey] = [];
+                    showEditorLoading();
+                    try {
+                        const dateKey = this.dataset.date;
+                        const task = await createTask(content, dateKey);
+                        
+                        if (task) {
+                            this.innerHTML = '';
+                            noteInput.style.display = 'none';
+                            renderWeeklyView();
+                        }
+                    } catch (error) {
+                        console.error('Error saving note:', error);
+                    } finally {
+                        hideEditorLoading();
                     }
-
-                    const newNote = {
-                        id: Date.now(),
-                        content: content,
-                        timestamp: Date.now(),
-                        completed: false,
-                        dateKey: dateKey
-                    };
-
-                    notes[dateKey].unshift(newNote);
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    
-                    this.innerHTML = '';
-                    noteInput.style.display = 'none';
-                    renderWeeklyView();
                 }
             });
 
@@ -514,6 +652,61 @@ document.addEventListener('DOMContentLoaded', function() {
             editor.addEventListener('mouseup', () => updateToolbarState(daySection));
             editor.addEventListener('focus', () => updateToolbarState(daySection));
         });
+
+        // Update formatting handlers for weekly view
+        const weeklyEditors = document.querySelectorAll('.week-container .note-editor');
+        weeklyEditors.forEach(editor => {
+            const toolbarBtns = editor.parentElement.querySelectorAll('.toolbar-btn');
+            const colorBtn = editor.parentElement.querySelector('.color-btn');
+            const colorPicker = editor.parentElement.querySelector('.text-color');
+
+            toolbarBtns.forEach(btn => {
+                btn.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    const command = this.dataset.command;
+                    
+                    // Focus editor first
+                    editor.focus();
+                    
+                    // Get current selection
+                    const selection = window.getSelection();
+                    
+                    // If no text is selected and it's not a color command, return
+                    if (selection.rangeCount === 0 && !this.classList.contains('color-btn')) {
+                        return;
+                    }
+                    
+                    // Execute command
+                    if (command) {
+                        document.execCommand(command, false, null);
+                    }
+                });
+            });
+
+            if (colorBtn && colorPicker) {
+                colorBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    colorPicker.click();
+                });
+
+                colorPicker.addEventListener('change', function(e) {
+                    editor.focus();
+                    const selection = window.getSelection();
+                    
+                    // If no text is selected, apply to cursor position
+                    if (selection.rangeCount === 0) {
+                        const range = document.createRange();
+                        range.setStart(editor, 0);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                    
+                    document.execCommand('foreColor', false, this.value);
+                    colorBtn.style.color = this.value;
+                });
+            }
+        });
     }
 
     // Helper function to update toolbar state
@@ -528,53 +721,140 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Update view handling
-    viewSelect.addEventListener('change', function() {
+    // Update the hasDataForRange function
+    function hasDataForRange(startDate, endDate, viewType) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        // For weekly view, check if data exists in week object
+        if (viewType === 'weekly' && window.initialData.week) {
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const dateKey = getDateKey(date);
+                // Check both notes object and initial week data
+                if (!(dateKey in notes) && !(dateKey in window.initialData.week)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // For monthly view, check if data exists in month object
+        if (viewType === 'monthly' && window.initialData.month) {
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const dateKey = getDateKey(date);
+                // Check both notes object and initial month data
+                if (!(dateKey in notes) && !(dateKey in window.initialData.month)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // For daily view or fallback
+        const dateKey = getDateKey(start);
+        return (dateKey in notes) || (dateKey in window.initialData.today);
+    }
+
+    // Update view change handler to pass view type
+    viewSelect.addEventListener('change', async function() {
         const view = this.value;
         
-        document.getElementById('dailyView').style.display = view === 'daily' ? 'block' : 'none';
-        document.getElementById('weeklyView').style.display = view === 'weekly' ? 'block' : 'none';
-        document.getElementById('monthlyView').style.display = view === 'monthly' ? 'block' : 'none';
+        showLoading();
         
-        if (view === 'monthly') {
-            renderMonthlyView();
-        } else if (view === 'weekly') {
-            renderWeeklyView();
-        } else {
-            updateDateDisplay();
-            loadNotes();
+        try {
+            // Hide all views first
+            document.getElementById('dailyView').style.display = 'none';
+            document.getElementById('weeklyView').style.display = 'none';
+            document.getElementById('monthlyView').style.display = 'none';
+            
+            // Show selected view and load data if needed
+            if (view === 'monthly') {
+                document.getElementById('monthlyView').style.display = 'block';
+                const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                
+                if (!hasDataForRange(monthStart, monthEnd, 'monthly')) {
+                    await fetchTasks(getDateKey(monthStart), getDateKey(monthEnd), 'monthly');
+                }
+                renderMonthlyView();
+            } else if (view === 'weekly') {
+                document.getElementById('weeklyView').style.display = 'block';
+                const weekStart = new Date(currentDate);
+                weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                if (!hasDataForRange(weekStart, weekEnd, 'weekly')) {
+                    await fetchTasks(getDateKey(weekStart), getDateKey(weekEnd), 'weekly');
+                }
+                renderWeeklyView();
+            } else {
+                document.getElementById('dailyView').style.display = 'block';
+                const dateKey = getDateKey(currentDate);
+                
+                if (!hasDataForRange(currentDate, currentDate, 'daily')) {
+                    await fetchTasks(dateKey, dateKey, 'daily');
+                }
+                updateDateDisplay();
+                loadNotes();
+            }
+        } catch (error) {
+            console.error('Error switching view:', error);
+        } finally {
+            hideLoading();
         }
     });
 
-    // Update navigation for both views
-    function navigateWeek(direction) {
-        console.log('Current date before:', currentDate.toDateString());
-        console.log('Direction:', direction);
-        
+    // Update navigation function to check for existing data
+    async function navigateWeek(direction) {
         const view = viewSelect.value;
-        const newDate = new Date(currentDate); // Create a new date object
+        const newDate = new Date(currentDate);
         
         if (view === 'weekly') {
             newDate.setDate(newDate.getDate() + (direction * 7));
+        } else if (view === 'monthly') {
+            newDate.setMonth(newDate.getMonth() + direction);
         } else {
             newDate.setDate(newDate.getDate() + direction);
         }
         
-        console.log('New date after:', newDate.toDateString());
-        
-        // Only update if moving backward or if next date is not beyond today
         if (direction < 0 || newDate <= today) {
             currentDate = newDate;
-            if (view === 'weekly') {
-                renderWeeklyView();
-            } else {
-                updateDateDisplay();
-                loadNotes();
+            
+            showLoading();
+            try {
+                if (view === 'weekly') {
+                    const weekStart = new Date(currentDate);
+                    weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    
+                    if (!hasDataForRange(weekStart, weekEnd, 'weekly')) {
+                        await fetchTasks(getDateKey(weekStart), getDateKey(weekEnd), 'weekly');
+                    }
+                    renderWeeklyView();
+                } else if (view === 'monthly') {
+                    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                    
+                    if (!hasDataForRange(monthStart, monthEnd, 'monthly')) {
+                        await fetchTasks(getDateKey(monthStart), getDateKey(monthEnd), 'monthly');
+                    }
+                    renderMonthlyView();
+                } else {
+                    const dateKey = getDateKey(currentDate);
+                    
+                    if (!hasDataForRange(currentDate, currentDate, 'daily')) {
+                        await fetchTasks(dateKey, dateKey, 'daily');
+                    }
+                    updateDateDisplay();
+                    loadNotes();
+                }
+                updateNavigationState();
+            } finally {
+                hideLoading();
             }
-            updateNavigationState();
         }
-        
-        console.log('Final current date:', currentDate.toDateString());
     }
 
     function renderMonthlyView() {
@@ -696,30 +976,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const colorPicker = notesContainer.querySelector('.text-color');
 
         // Handle Enter key to save note
-        editor.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        editor.addEventListener('keydown', async function(e) {
+            if (e.key === 'Enter') {
+                if (e.shiftKey) {
+                    return;
+                }
                 e.preventDefault();
                 const content = this.innerHTML.trim();
                 if (!content) return;
 
-                if (!notes[dateKey]) {
-                    notes[dateKey] = [];
+                showEditorLoading();
+                try {
+                    const task = await createTask(content, dateKey);
+                    
+                    if (task) {
+                        this.innerHTML = '';
+                        loadSidebarNotes(dateKey);
+                        renderMonthlyView();
+                    }
+                } catch (error) {
+                    console.error('Error saving note:', error);
+                } finally {
+                    hideEditorLoading();
                 }
-
-                const newNote = {
-                    id: Date.now(),
-                    content: content,
-                    timestamp: Date.now(),
-                    completed: false,
-                    dateKey: dateKey
-                };
-
-                notes[dateKey].unshift(newNote);
-                localStorage.setItem('notes', JSON.stringify(notes));
-                
-                this.innerHTML = '';
-                loadSidebarNotes(dateKey);
-                renderMonthlyView(); // Update the calendar view
             }
         });
 
@@ -777,81 +1056,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update the text formatting handlers
-    function initializeTextEditor() {
-        const editor = document.getElementById('noteEditor');
-        const toolbarBtns = document.querySelectorAll('.toolbar-btn');
-        const colorBtn = document.getElementById('colorBtn');
-        const colorPicker = document.getElementById('textColor');
-
-        // Set initial focus
-        editor.focus();
-
-        // Format buttons (Bold, Italic, Underline)
-        toolbarBtns.forEach(btn => {
-            if (btn.dataset.command) {
-                btn.addEventListener('mousedown', (e) => {
-                    e.preventDefault(); // Prevent losing focus
-                    const command = btn.dataset.command;
-                    
-                    // Save selection
-                    const selection = window.getSelection();
-                    const range = selection.getRangeAt(0);
-                    
-                    // Execute command
-                    document.execCommand(command, false, null);
-                    
-                    // Restore selection
-                    editor.focus();
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                    
-                    // Update button state
-                    updateToolbarState();
-                });
-            }
-        });
-
-        // Color picker
-        colorBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            
-            colorPicker.click();
-            
-            colorPicker.addEventListener('change', function() {
-                // Restore selection
-                editor.focus();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                
-                // Apply color
-                document.execCommand('foreColor', false, this.value);
-                colorBtn.style.color = this.value;
-                colorBtn.classList.add('active');
-            }, { once: true }); // Remove listener after use
-        });
-
-        // Update toolbar state when selection changes
-        ['keyup', 'mouseup', 'focus'].forEach(event => {
-            editor.addEventListener(event, updateToolbarState);
-        });
-
-        function updateToolbarState() {
-            toolbarBtns.forEach(btn => {
-                const command = btn.dataset.command;
-                if (command) {
-                    const isActive = document.queryCommandState(command);
-                    btn.classList.toggle('active', isActive);
-                }
-            });
-        }
+    // Update the date display function
+    function updateDateDisplay() {
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        currentDateEl.textContent = currentDate.toLocaleDateString(undefined, options);
     }
-
-    // Call this function when the document is ready
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeTextEditor();
-        // ... rest of your existing code
-    });
 }); 

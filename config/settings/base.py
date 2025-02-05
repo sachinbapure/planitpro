@@ -106,6 +106,8 @@ AUTH_USER_MODEL = "users.Account"
 LOGIN_REDIRECT_URL = "home"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
+# https://docs.djangoproject.com/en/dev/ref/settings/#logout-url
+LOGOUT_URL = "account_logout"
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -293,7 +295,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_ADAPTER = "planit.users.adapters.AccountAdapter"
 ACCOUNT_FORMS = {
     "signup": "planit.users.forms.UserSignupForm",

@@ -829,4 +829,29 @@ body.light-mode .day-sidebar {
 .day-section .toggle-btn:hover,
 .day-section .delete-btn:hover {
     opacity: 1;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.editor-spinner {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.note-input {
+    position: relative;
 } 

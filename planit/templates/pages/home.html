@@ -8,10 +8,22 @@
 
 {% block javascript %}
 {{ block.super }}
+<script>
+    // Pass initial data to calendar.js
+    window.initialData = JSON.parse('{{ initial_data|escapejs }}');
+    console.log('Initial data loaded:', window.initialData);  // Debug log
+</script>
 <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
 
 {% block content %}
+{% if not user.is_authenticated %}
+  <script>
+    window.location.href = "{% url 'account_login' %}";
+  </script>
+{% else %}
+<!-- Add CSRF token -->
+{% csrf_token %}
 <div class="calendar-container">
   <div class="calendar-header">
     <div class="calendar-nav">
@@ -25,10 +37,6 @@
       </div>
     </div>
     <div class="header-actions">
-      <div class="search-wrapper">
-        <i class="fas fa-search"></i>
-        <input type="text" class="search-box" placeholder="Search...">
-      </div>
       <button class="download-btn" id="exportNotes">
         <i class="fas fa-download"></i>
         Export
@@ -152,4 +160,5 @@
     </div>
   </div>
 </div>
+{% endif %}
 {% endblock %}

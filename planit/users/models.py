@@ -56,6 +56,7 @@ class Task(Model):
     date = DateField()
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
+    completed = models.BooleanField(default=False)
     user = ForeignKey(
         Account,
         on_delete=SET_NULL,
@@ -70,6 +71,18 @@ class Task(Model):
             models.Index(fields=['date']),
             models.Index(fields=['user', 'date']),
         ]
+
+    def to_dict(self):
+        """Convert task to dictionary format matching frontend expectations"""
+        data = {
+            'id': str(self.id),
+            'content': self.content,
+            'timestamp': int(self.created_at.timestamp() * 1000),  # Convert to JS timestamp
+            'completed': self.completed,
+            'dateKey': self.date.strftime('%Y-%m-%d')
+        }
+        print(f"Task to_dict output: {data}")  # Debug print
+        return data
 
 
 class UserPreference(Model):
