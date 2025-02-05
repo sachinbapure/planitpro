@@ -114,7 +114,64 @@
     margin-bottom: 2rem;
     font-size: 15px;
   }
+
+  .password-field {
+    position: relative;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-toggle:hover {
+    color: #9ca3af;
+  }
+
+  .password-toggle i {
+    font-size: 16px;
+  }
+
+  .password-field .form-control {
+    padding-right: 45px;
+  }
 </style>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const passwordFields = document.querySelectorAll('input[type="password"]');
+    
+    passwordFields.forEach(field => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'password-field';
+      field.parentNode.insertBefore(wrapper, field);
+      wrapper.appendChild(field);
+      
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'password-toggle';
+      toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+      wrapper.appendChild(toggleBtn);
+      
+      toggleBtn.addEventListener('click', function() {
+        const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+        field.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+      });
+    });
+  });
+</script>
 {% endblock %}
 
 {% block content %}

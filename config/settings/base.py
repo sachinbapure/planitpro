@@ -296,7 +296,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_ADAPTER = "planit.users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "planit.users.adapters.CustomAccountAdapter"
 ACCOUNT_FORMS = {
     "signup": "planit.users.forms.UserSignupForm",
 }
@@ -304,7 +304,7 @@ ACCOUNT_FORMS = {
 SOCIALACCOUNT_ADAPTER = "planit.users.adapters.SocialAccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 SOCIALACCOUNT_FORMS = {"signup": "planit.users.forms.UserSocialSignupForm"}
-
+ACCOUNT_LOGOUT_ON_GET = True  # Skip logout confirmation
 
 # Your stuff...
 # ------------------------------------------------------------------------------
