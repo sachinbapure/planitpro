@@ -781,3 +781,17 @@ body.light-mode .note-item,
     display: none;
 }
 */
+
+#signOutLink {
+    pointer-events: auto !important;
+    text-decoration: none;
+}
+
+#signOutLink:hover {
+    color: var(--text-hover);
+}
+
+/* Prevent any dynamic text changes */
+#signOutLink i {
+    margin-right: 8px;
+}

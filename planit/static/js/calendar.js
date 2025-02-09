@@ -32,8 +32,37 @@ $(document).ready(function() {
         }
     });
 
-    $prevDayBtn.on('click', () => navigateWeek(-1));
-    $nextDayBtn.on('click', () => navigateWeek(1));
+    // Remove old event bindings
+    $prevDayBtn.off('click');
+    $nextDayBtn.off('click');
+
+    // Add single event binding for navigation
+    $prevDayBtn.on('click', async (e) => {
+        e.preventDefault(); // Prevent any default action
+        e.stopPropagation(); // Stop event from bubbling up
+        await navigateWeek(-1);
+    });
+
+    $nextDayBtn.on('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await navigateWeek(1);
+    });
+
+    // Update keyboard navigation to prevent double triggers
+    $(document).off('keydown.navigation').on('keydown.navigation', (e) => {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.isContentEditable) {
+            return;
+        }
+        
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            $prevDayBtn.trigger('click');
+        } else if (e.key === 'ArrowRight' && !$nextDayBtn.prop('disabled')) {
+            e.preventDefault();
+            $nextDayBtn.trigger('click');
+        }
+    });
 
     // Text formatting handlers
     $toolbarBtns.on('mousedown', function(e) {
@@ -200,9 +229,6 @@ $(document).ready(function() {
         }
     });
 
-    $prevDayBtn.on('click', () => navigateWeek(-1));
-    $nextDayBtn.on('click', () => navigateWeek(1));
-
     // Define commands array at the top with other variables
     const commands = ['bold', 'italic', 'underline'];
 
@@ -308,38 +334,6 @@ $(document).ready(function() {
         $nextDayBtn.prop('disabled', currentDate >= today);
     }
 
-    // Add keyboard navigation
-    $(document).on('keydown', (e) => {
-        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.isContentEditable) {
-            return;
-        }
-        
-        if (e.key === 'ArrowLeft') {
-            $prevDayBtn.click();
-        } else if (e.key === 'ArrowRight' && !$nextDayBtn.prop('disabled')) {
-            $nextDayBtn.click();
-        }
-    });
-
-    // Update the Today link handler
-    $('#todayLink').on('click', (e) => {
-        e.preventDefault();
-        const view = $viewSelect.val();
-        
-        currentDate = new Date();
-        setStartOfDay(currentDate);
-        
-        if (view === 'monthly') {
-            renderMonthlyView();
-        } else if (view === 'weekly') {
-            renderWeeklyView();
-        } else {
-            updateDateDisplay();
-            loadNotes();
-        }
-        updateNavigationState();
-    });
-
     // Update toggle and delete handlers
     window.toggleNote = async function(dateKey, taskId) {
         const $noteItem = $(`.note-item[data-id="${taskId}"]`);
@@ -440,9 +434,6 @@ $(document).ready(function() {
         const options = { weekday: 'long', day: 'numeric', month: 'short' };
         let dateStr = date.toLocaleDateString(undefined, options);
         
-        if (date.getTime() === today.getTime()) {
-            dateStr += ' (Today)';
-        }
         return dateStr;
     }
 
@@ -943,11 +934,12 @@ $(document).ready(function() {
         }
     });
 
-    // Update navigation function to check for existing data
+    // Update navigation function to handle daily navigation correctly
     async function navigateWeek(direction) {
         const view = $viewSelect.val();
         const newDate = new Date(currentDate);
         
+        // Calculate the new date based on view type
         if (view === 'weekly') {
             newDate.setDate(newDate.getDate() + (direction * 7));
         } else if (view === 'monthly') {
@@ -956,6 +948,7 @@ $(document).ready(function() {
             newDate.setDate(newDate.getDate() + direction);
         }
         
+        // Only allow navigation if moving backwards or if new date is not after today
         if (direction < 0 || newDate <= today) {
             currentDate = newDate;
             
@@ -980,6 +973,7 @@ $(document).ready(function() {
                     }
                     renderMonthlyView();
                 } else {
+                    // Daily view
                     const dateKey = getDateKey(currentDate);
                     
                     if (!hasDataForRange(currentDate, currentDate, 'daily')) {
@@ -1220,4 +1214,10 @@ $(document).ready(function() {
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || '';
     }
+
+    // Remove any existing handlers that might be changing the text
+    $('.nav-link').off('click');
+    
+    // Ensure sign out link text stays correct
+    $('#signOutLink').text('Sign Out');
 }); 

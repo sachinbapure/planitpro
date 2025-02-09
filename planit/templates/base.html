@@ -52,8 +52,8 @@
   <body class="dark-mode">
     <nav class="navbar navbar-expand-md fixed-top">
       <div class="container-fluid">
+        <!-- Logo on the left -->
         <a class="navbar-brand" href="{% url 'home' %}">
-          <!-- Simple animated logo -->
           <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path class="calendar-page" d="M7 5C7 3.89543 7.89543 3 9 3H23C24.1046 3 25 3.89543 25 5V27C25 28.1046 24.1046 29 23 29H9C7.89543 29 7 28.1046 7 27V5Z" stroke="currentColor" stroke-width="2"/>
             <path class="calendar-lines" d="M11 11H21M11 16H21M11 21H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -62,30 +62,20 @@
           <span class="logo-text">PlannIt.pro</span>
         </a>
 
+        <!-- Hamburger menu for mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         
+        <!-- Navigation items -->
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'home' %}" id="todayLink">
-                <i class="fas fa-calendar-day"></i>
-                Today
-              </a>
-            </li>
-          </ul>
-          
-          <ul class="navbar-nav">
-            <!-- Theme toggle button removed for future release -->
-            <!-- <li class="nav-item">
-              <button class="theme-toggle nav-link" id="themeToggle" aria-label="Toggle theme">
-                <div class="theme-switch">...</div>
-              </button>
-            </li> -->
+          <ul class="navbar-nav ms-auto">
             {% if request.user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
+                <a class="nav-link" href="{% url 'account_logout' %}" id="signOutLink">
+                  <i class="fas fa-sign-out-alt"></i>
+                  {% translate "Sign Out" %}
+                </a>
               </li>
             {% else %}
               {% if ACCOUNT_ALLOW_REGISTRATION %}
