@@ -107,15 +107,21 @@ class TaskView(View):
             }, status=400)
     
     def put(self, request, task_id):
-        """Update task completion status"""
+        """Update task content or completion status"""
         try:
             task = Task.objects.get(id=task_id, user=request.user)
             data = json.loads(request.body)
             
+            # Update completion status if provided
             if 'completed' in data:
                 task.completed = data['completed']
-                task.save()
-                
+            
+            # Update content if provided
+            if 'content' in data:
+                task.content = data['content']
+            
+            task.save()
+            
             return JsonResponse({
                 'status': 'success',
                 'task': task.to_dict()
