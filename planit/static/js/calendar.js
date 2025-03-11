@@ -665,12 +665,13 @@ $(document).ready(function() {
     }
 
     function openSidebar(date) {
-        const sidebar = $('.day-sidebar');
-        const selectedDateEl = $('#selectedDate');
-                const dateKey = getDateKey(date);
+        const $sidebar = $('.day-sidebar');
+        const $overlay = $('.sidebar-overlay');
+        const $selectedDateEl = $('#selectedDate');
+        const dateKey = getDateKey(date);
         
         // Update selected date display
-        selectedDateEl.text(date.toLocaleDateString(undefined, { 
+        $selectedDateEl.text(date.toLocaleDateString(undefined, { 
             weekday: 'long', 
             month: 'short', 
             day: 'numeric' 
@@ -679,12 +680,21 @@ $(document).ready(function() {
         // Load notes for selected date
         loadSidebarNotes(dateKey);
         
-        // Show sidebar
-        sidebar.addClass('open');
+        // Show overlay and sidebar
+        $overlay.addClass('active');
+        $sidebar.addClass('open');
         
         // Update selected state
         $('.day-cell').removeClass('selected');
         $(`.day-cell[data-date="${dateKey}"]`).addClass('selected');
+
+        // Add click outside handler
+        $(document).on('mousedown.sidebar', function(e) {
+            if (!$(e.target).closest('.day-sidebar').length) {
+                closeSidebar();
+                $(document).off('mousedown.sidebar');
+            }
+        });
     }
 
     function loadSidebarNotes(dateKey) {
@@ -772,10 +782,22 @@ $(document).ready(function() {
         renderMonthlyView(); // Update the calendar view
     };
 
-    // Add close sidebar handler
-    $('.close-sidebar').on('click', () => {
+    // Add click handlers for closing sidebar
+    $('.sidebar-overlay, .close-sidebar').on('click', function(e) {
+        e.preventDefault();
+        closeSidebar();
+    });
+
+    function closeSidebar() {
         $('.day-sidebar').removeClass('open');
+        $('.sidebar-overlay').removeClass('active');
         $('.day-cell').removeClass('selected');
+        $(document).off('mousedown.sidebar');
+    }
+
+    // Prevent sidebar from closing when clicking inside it
+    $('.day-sidebar').on('click', function(e) {
+        e.stopPropagation();
     });
 
     // Update the date display function
@@ -1129,29 +1151,30 @@ $(document).ready(function() {
     async function saveNote(editorParam, dateKeyParam) {
         const $editor = $(editorParam || '#noteEditor');
         const content = $editor.html().trim();
-                if (!content) return;
+        if (!content) return;
 
-                showEditorLoading();
-                try {
+        showEditorLoading();
+        try {
             const dateKey = dateKeyParam || getDateKey(currentDate);
             const taskId = $editor.data('editingTaskId');
+            const viewType = $('#viewSelect').val();
             let task;
-                    
+            
             if (taskId) {
                 // Update existing task
                 task = await updateTask(taskId, content);
-                    if (task) {
-                    // Immediately update the note in the list
-                    const $noteItem = $(`.note-item[data-id="${taskId}"]`);
-                    if ($noteItem.length) {
-                        $noteItem.find('.note-content').html(task.content);
-                    }
-                    // Also update in notes object
+                if (task) {
+                    // Update in notes object
                     if (notes[dateKey]) {
                         const noteIndex = notes[dateKey].findIndex(n => n.id === taskId);
                         if (noteIndex !== -1) {
                             notes[dateKey][noteIndex] = task;
                         }
+                    }
+                    // Update UI
+                    const $noteItem = $(`.note-item[data-id="${taskId}"]`);
+                    if ($noteItem.length) {
+                        $noteItem.find('.note-content').html(task.content);
                     }
                 }
             } else {
@@ -1163,25 +1186,43 @@ $(document).ready(function() {
                         notes[dateKey] = [];
                     }
                     notes[dateKey].unshift(task);
-                    // Prepend to list
-                    const $notesList = viewType === 'monthly' ? 
-                        $('.day-sidebar .day-notes') : 
-                        viewType === 'weekly' ? 
-                        $(`[data-date="${dateKey}"] .notes-list`) :
-                        $('#notesList');
-                    $notesList.prepend(getNoteItemTemplate(task, dateKey));
+
+                    // Update UI based on current view
+                    if (viewType === 'monthly') {
+                        // Update sidebar if open
+                        const $sidebarNotes = $('.day-sidebar .day-notes');
+                        if ($sidebarNotes.is(':visible')) {
+                            $sidebarNotes.prepend(getNoteItemTemplate(task, dateKey));
+                        }
+                        // Update month view note count
+                        const $dayCell = $(`.day-cell[data-date="${dateKey}"]`);
+                        const currentCount = parseInt($dayCell.find('.note-count').text()) || 0;
+                        $dayCell.find('.note-count').text(`${currentCount + 1} notes`);
+                    } else if (viewType === 'weekly') {
+                        // Update weekly view
+                        const $daySection = $(`.day-section [data-date="${dateKey}"]`).closest('.day-section');
+                        $daySection.find('.day-notes').prepend(getNoteItemTemplate(task, dateKey));
+                    } else {
+                        // Update daily view
+                        $('#notesList').prepend(getNoteItemTemplate(task, dateKey));
+                    }
                 }
             }
 
             if (task) {
+                // Clear editor
                 $editor.html('').data('editingTaskId', null);
-                    }
-                } catch (error) {
-                    console.error('Error saving note:', error);
-                } finally {
-                    hideEditorLoading();
+                // Hide note input in weekly view
+                if (viewType === 'weekly') {
+                    $editor.closest('.note-input').hide();
                 }
             }
+        } catch (error) {
+            console.error('Error saving note:', error);
+        } finally {
+            hideEditorLoading();
+        }
+    }
 
     function loadNotes() {
         const dateKey = getDateKey(currentDate);
